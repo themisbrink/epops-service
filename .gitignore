@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+*.user
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+# Rider / VS Code
+.idea/
+.vscode/

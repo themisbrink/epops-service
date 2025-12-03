@@ -1,0 +1,6 @@
+@EpopsService_HostAddress = http://localhost:5098
+
+GET {{EpopsService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
