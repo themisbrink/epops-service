@@ -3,9 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add EF Core + SQLite
-builder.Services.AddDbContext<EpopsDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddDbContext<EpopsDbContext>(o =>
+    o.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 var app = builder.Build();
 
@@ -28,5 +27,11 @@ app.MapPost("/update", async (BookData input, EpopsDbContext db) =>
 // Example: get all rows
 app.MapGet("/all", async (EpopsDbContext db) =>
     await db.BookData.ToListAsync());
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EpopsDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
