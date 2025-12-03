@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+.git
+.gitignore
+Dockerfile
+*.user
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
