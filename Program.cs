@@ -8,13 +8,27 @@ var builder = WebApplication.CreateBuilder(args);
 // Use Render $PORT environment variable
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontends", policy =>
+    {
+        policy.WithOrigins(
+            "https://f8d652-65.myshopify.com",
+            "https://www.epopspublishing.com",
+            "https://epopspublishing.com"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
+});
+
 // DB context (Supabase)
 builder.Services.AddDbContext<EpopsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
 );
 
 var app = builder.Build();
-
+app.UseCors("AllowFrontends");
 // No migrations or EnsureCreated since table exists manually
 // app.Services.CreateScope();  // <--- REMOVE ALL MIGRATION CODE
 
