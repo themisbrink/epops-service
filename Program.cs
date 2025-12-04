@@ -46,7 +46,7 @@ app.MapPost("/batch-create", async (BatchCreateRequest req, EpopsDbContext db) =
             SourceItemId = req.SourceItemId,
             NumberInJob = i.ToString(),
             PrintQuantity = req.PrintQuantity.ToString(),
-            Status = "Created",
+            Status = "Unregistered",
             UpdatedAt = DateTime.UtcNow
         });
     }
