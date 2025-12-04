@@ -78,24 +78,52 @@ app.MapPost("/register", async (string bookUid, EpopsDbContext db) =>
     var record = await db.BookData.FirstOrDefaultAsync(b => b.BookUid == bookUid);
 
     if (record == null)
-        return Results.NotFound(new { message = "BookUid not found" });
+    {
+        return Results.NotFound(new
+        {
+            bookUid,
+            message = "BookiId not valid"
+        });
+    }
 
-    // If unregistered → update to registered
-    if (record.Status.ToLower() == "unregistered")
+    var status = record.Status?.ToLowerInvariant() ?? "";
+
+    if (status == "registered")
+    {
+        return Results.Ok(new
+        {
+            bookUid = record.BookUid,
+            status = record.Status,
+            updatedAt = record.UpdatedAt,
+            message = "Already Registered"
+        });
+    }
+
+    if (status == "unregistered")
     {
         record.Status = "registered";
         record.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        return Results.Ok(new
+        {
+            bookUid = record.BookUid,
+            status = record.Status,
+            updatedAt = record.UpdatedAt,
+            message = "registration success"
+        });
     }
 
-    // Always return the final status
+    // Any other unexpected status → treat as not valid
     return Results.Ok(new
     {
         bookUid = record.BookUid,
         status = record.Status,
-        updatedAt = record.UpdatedAt
+        updatedAt = record.UpdatedAt,
+        message = "BookiId not valid"
     });
 });
+
 
 // Bind runtime port correctly for Render
 app.Run($"http://0.0.0.0:{port}");
