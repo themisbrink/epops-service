@@ -10,6 +10,7 @@ namespace EpopsService.Data
         public EpopsDbContext(DbContextOptions<EpopsDbContext> options) : base(options) { }
     }
 
+    [Table("book_data")]
     public class BookData
     {
         [Key]
