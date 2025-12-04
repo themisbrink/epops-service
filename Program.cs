@@ -57,5 +57,31 @@ app.MapPost("/batch-create", async (BatchCreateRequest req, EpopsDbContext db) =
     return new { Created = rows.Count, Sample = rows.Take(3) };
 });
 
+// register Book
+// POST https://epops-service.onrender.com/register?bookUid=BOOK-2001x9786180000001x3x5
+app.MapPost("/register", async (string bookUid, EpopsDbContext db) =>
+{
+    var record = await db.BookData.FirstOrDefaultAsync(b => b.BookUid == bookUid);
+
+    if (record == null)
+        return Results.NotFound(new { message = "BookUid not found" });
+
+    // If unregistered → update to registered
+    if (record.Status.ToLower() == "unregistered")
+    {
+        record.Status = "registered";
+        record.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+    }
+
+    // Always return the final status
+    return Results.Ok(new
+    {
+        bookUid = record.BookUid,
+        status = record.Status,
+        updatedAt = record.UpdatedAt
+    });
+});
+
 // Bind runtime port correctly for Render
 app.Run($"http://0.0.0.0:{port}");
