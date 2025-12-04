@@ -1,36 +1,36 @@
-using EpopsService.Data;
+﻿using EpopsService.Data;
 using Microsoft.EntityFrameworkCore;
-using EpopsService.Diagnostics;
 
 
-//await DbTester.TestConnection();
-//return;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DB context � Supabase Postgres
+// Use Render $PORT environment variable
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+
+// DB context (Supabase)
 builder.Services.AddDbContext<EpopsDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+);
 
 var app = builder.Build();
 
-// Ensure DB & tables exist (no migrations tooling needed)
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<EpopsDbContext>();
-    db.Database.Migrate();
-}
+// No migrations or EnsureCreated since table exists manually
+// app.Services.CreateScope();  // <--- REMOVE ALL MIGRATION CODE
 
-// Simple endpoints
-app.MapPost("/update", async (BookData input, EpopsDbContext db) =>
-{
-    input.UpdatedAt = DateTime.UtcNow;
-    db.BookData.Add(input);
-    await db.SaveChangesAsync();
-    return Results.Ok(new { message = "OK" });
-});
+//------------------------------------------------------------
+// Routes
+//------------------------------------------------------------
 
+// Add one test endpoint
+app.MapGet("/", () => "Epops Service online ✔");
 
+// GET all
+app.MapGet("/all", async (EpopsDbContext db) =>
+    await db.BookData.OrderByDescending(b => b.UpdatedAt).ToListAsync()
+);
+
+// BATCH CREATE
 app.MapPost("/batch-create", async (BatchCreateRequest req, EpopsDbContext db) =>
 {
     var rows = new List<BookData>();
@@ -54,15 +54,8 @@ app.MapPost("/batch-create", async (BatchCreateRequest req, EpopsDbContext db) =
     db.BookData.AddRange(rows);
     await db.SaveChangesAsync();
 
-    return Results.Ok(new
-    {
-        Created = rows.Count,
-        Sample = rows.Take(3).ToList()  // returns 3 sample entries
-    });
+    return new { Created = rows.Count, Sample = rows.Take(3) };
 });
 
-
-app.MapGet("/all", async (EpopsDbContext db) =>
-    await db.BookData.OrderByDescending(b => b.UpdatedAt).ToListAsync());
-
-app.Run();
+// Bind runtime port correctly for Render
+app.Run($"http://0.0.0.0:{port}");
