@@ -1,8 +1,13 @@
 ﻿namespace EpopsService.Data
 {
+    public class historyItem
+    {
+        public string text;
+        public string from;
+    }
     public class ChatModels
     {
-        public record GaiaBChatRequest(string Question, List<string>? History);
+        public record GaiaBChatRequest(string Question, List<historyItem>? History);
 
         public class GaiaBSyncResponse
         {

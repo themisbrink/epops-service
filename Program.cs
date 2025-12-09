@@ -140,7 +140,7 @@ app.MapPost("/chat", async (GaiaBChatRequest req, IHttpClientFactory http) =>
     if (string.IsNullOrWhiteSpace(req.Question))
         return Results.BadRequest(new { error = "Question is required" });
 
-    var client = http.CreateClient("GaiaB");
+    var GaiaBClient = http.CreateClient("GaiaB");
 
     var payload = new
     {
@@ -156,7 +156,7 @@ app.MapPost("/chat", async (GaiaBChatRequest req, IHttpClientFactory http) =>
 
     try
     {
-        var response = await client.PostAsJsonAsync("/api/gaiab/apps/sync/", payload);
+        var response = await GaiaBClient.PostAsJsonAsync("/api/gaiab/apps/sync/", payload);
 
         var result = await response.Content.ReadFromJsonAsync<GaiaBSyncResponse>();
 
