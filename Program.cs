@@ -150,7 +150,7 @@ app.MapPost("/chat", async (GaiaBChatRequest req, IHttpClientFactory http) =>
         app_params = new
         {
             current_question = req.Question,
-            history = req.History ?? new List<string>()
+            history = req.History ?? new List<historyItem>()
         }
     };
 
